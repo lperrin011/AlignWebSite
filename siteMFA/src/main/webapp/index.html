@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phonetic forced-aligner</title>
+<link rel="stylesheet" href="style.css">
+<!-- Sites des polices de texte -->
+<link
+	href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+<!-- Site des icones -->
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/fontisto/3.0.4/css/fontisto/fontisto.min.css">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="icon" href="./images/signal-alt-2.png">
+<script src="js/app.js"></script>
+<!-- <script src="praatio/lib/textgrid.js" type="module"></script> -->
+
+
+</head>
+<body>
+	<div class="loader" id="loader"> <!-- Filled by app.js -->
+		<p>Chargement...</p>
+	</div>
+	<header class="header">
+		<img src="./images/signal-alt-2.png" alt="logo" title="logo">
+		<nav class="nav">  <!-- Navigation menu -->
+			<li><a href="index.html">Accueil</a></li>
+			<li><a href="#data">Data</a></li>
+			<li><a href="#model">Model</a></li>
+			<li><a href="#result">Result</a></li>
+		</nav>
+	</header>
+
+	<section class="top-page">
+		<h1 class="big-title">Phonetic forced-aligner</h1>
+		
+		<!-- Ask to give the Wav and the TextGrid files -->
+		<div class="data" id="data">
+			<h2 title="Load your data" class="title">Data</h2>
+
+			<form class="data-form" action="data" method="post" enctype="multipart/form-data">
+				<div class="data-items">
+					<div class="data-item">
+						<img src="./images/volume.png" alt="volume icon"> <label
+							for="audio" class="data-details">Load audio file</label><br>
+						<input class="data-input" type="file" name="audio" id="audio" title="Add the audio file">
+					</div>
+
+					<div class="data-item">
+						<img src="./images/edit.png" alt="text icon"> <label
+							for="text" class="data-details">Load transcription file</label><br>
+						<input class="data-input" type="file" name="text" id="text" title="Add the transcription file">
+					</div>
+				</div>
+				<br>
+				<br> <input class="data-submit" type="submit" value="OK" title="Validate input files">
+			</form>
+    	
+		</div>
+
+	</section>
+	
+    
+    <!-- Button to display the JSP that print the result -->
+ <!--    <form class="print-form" action="printText" method="get" enctype="multipart/form-data">
+		<input class="print-button" type="submit">	
+	</form> -->
+	
+	
+   
+    	
+   
+    
+	<footer class="footer"> </footer>
+
+</body>
+</html>
