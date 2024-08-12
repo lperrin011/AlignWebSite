@@ -40,6 +40,7 @@
 
 	</section>
 
+<!-- TRY -->
 	
 			
 		<%-- 	<p>Modèle acoustique choisi : <%= request.getAttribute("model") %></p>
