@@ -33,6 +33,7 @@ public class Model extends HttpServlet {
 			
 			String webAppPath = getServletContext().getRealPath("/");
 			String filePath = webAppPath + "models.txt";  
+			String filePath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/models.txt";  
 	        BufferedReader reader = null;
 
 	        try {

@@ -28,6 +28,7 @@ public class Download extends HttpServlet {
 		// String directoryPath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
 		 String webAppPath = getServletContext().getRealPath("/");
 		 String directoryPath = webAppPath + "output/";
+		 String directoryPath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
 		 File folder = new File(directoryPath);
 		 File[] files = folder.listFiles();
 		 File result = files[0];

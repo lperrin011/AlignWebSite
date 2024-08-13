@@ -53,10 +53,24 @@
   <servlet>
     <servlet-name>Download</servlet-name>
     <servlet-class>com.octest.servlets.Download</servlet-class>
-  </servlet>
-  <servlet-mapping>
+    <multipart-config>
+        <location>/siteMFA/fichierstmp/</location>
+        <max-file-size>10485760</max-file-size>
+        <max-request-size>52428800</max-request-size>
+        <file-size-threshold>1048576</file-size-threshold>
+    </multipart-config>
+</servlet>
+<servlet-mapping>
     <servlet-name>Download</servlet-name>
     <url-pattern>/Download</url-pattern>
+</servlet-mapping>
+  <servlet>
+    <servlet-name>Lucie</servlet-name>
+    <servlet-class>com.octest.servlets.Lucie</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Lucie</servlet-name>
+    <url-pattern>/lucie</url-pattern>
   </servlet-mapping>
   <servlet>
     <servlet-name>printText</servlet-name>

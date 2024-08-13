@@ -529,6 +529,487 @@ public class Align extends HttpServlet {
 		ArrayList<Interval> phonemeIntervals = new ArrayList<>();
 
 		String directoryPath = webAppPath + OUTPUT_PATH;
+	public static final String INPUT_PATH = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/input/";
+	public static final String OUTPUT_PATH = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
+	public static final String MODEL_PATH = "/home/lucie/Documents/MFA/pretrained_models/acoustic/";
+	public static final String DICT_PATH = "/home/lucie/Documents/MFA/pretrained_models/dictionary/";
+
+//	private static AtomicInteger progress = new AtomicInteger(0);
+
+	public Align() {
+		super();
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("application/json");
+	}
+
+	private boolean executeCommandsSequentially(String[] commands) throws IOException, InterruptedException {
+		// Commande complète à exécuter
+		String command = String.join(" && ", commands);
+		boolean success = true;
+
+		// Utilisation de ProcessBuilder pour exécuter les commandes
+		ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
+		processBuilder.redirectErrorStream(true);
+
+		Process process = processBuilder.start();
+		System.out.println("in execute command");
+		StringBuilder output = new StringBuilder();
+		StringBuilder errorOutput = new StringBuilder();
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				output.append(line).append("\n");
+			}
+
+			while ((line = errorReader.readLine()) != null) {
+				errorOutput.append(line).append("\n");
+			}
+
+			int exitCode = process.waitFor();
+			if (exitCode != 0) {
+				success = false;
+			}
+		} finally {
+			// Ensure that the output stream is closed and the process is destroyed
+			process.getOutputStream().close();
+			process.destroy();
+		}
+
+		System.out.println("Commande exécutée avec succès : " + output.toString());
+		return success;
+		
+
+	}
+	
+	private boolean executeCommandsValidate(String[] commands) throws IOException, InterruptedException {
+		// Commande complète à exécuter
+		String command = String.join(" && ", commands);
+		boolean isValid = true;
+
+		// Utilisation de ProcessBuilder pour exécuter les commandes
+		ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
+		processBuilder.redirectErrorStream(true);
+
+		Process process = processBuilder.start();
+		System.out.println("in execute command");
+		StringBuilder output = new StringBuilder();
+		StringBuilder errorOutput = new StringBuilder();
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				output.append(line).append("\n");
+				 if (line.contains("False")) {
+		                isValid = false;
+		         }
+			}
+
+			while ((line = errorReader.readLine()) != null) {
+				errorOutput.append(line).append("\n");
+			}
+
+			int exitCode = process.waitFor();
+			if (exitCode != 0) {
+				isValid = false;
+			}
+		} finally {
+			// Ensure that the output stream is closed and the process is destroyed
+			process.getOutputStream().close();
+			process.destroy();
+		}
+
+		System.out.println("Commande exécutée avec succès : " + output.toString());
+		return isValid;
+		
+	}
+
+//	private void updateProgress(String line) {
+//		// progression update
+//		if (line.contains("Generating MFCCs")) {
+//			progress.set(10);
+//		} else if (line.contains("Calculating CMVN")) {
+//			progress.set(20);
+//		} else if (line.contains("Creating corpus split")) {
+//			progress.set(30);
+//		} else if (line.contains("Compiling training graphs")) {
+//			progress.set(40);
+//		} else if (line.contains("Calculating fMLLR for speaker adaptation")) {
+//			progress.set(50);
+//		} else if (line.contains("Generating alignments")) {
+//			progress.set(60);
+//		} else if (line.contains("Collecting phone and word alignments from alignment lattices")) {
+//			progress.set(70);
+//		} else if (line.contains("Exporting alignment TextGrids")) {
+//			progress.set(80);
+//		} else if (line.contains("Done!")) {
+//			progress.set(100);
+//		}
+//	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		
+		 ///////// LISTE DES MODELES ET DICTIONNAIRES //////////
+        // Useful here in case there is an error so we need to print the data page
+		
+        /* Models */
+        ArrayList<String> models = new ArrayList<>();
+		String filePath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/models.txt";  
+        BufferedReader reader = null;
+		String debug ="";
+
+
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line;
+
+           
+            while ((line = reader.readLine()) != null) {
+            	// Get the name of the model
+            	if (line.contains(":")) {
+	            	int comma1 = line.indexOf('\'');
+	            	int comma2 = line.indexOf('\'', comma1 + 1);
+	            	debug = debug + line + " " + comma1 +" " + comma2 + " ";
+	            	if(comma1 != -1 && comma2 != -1) {
+	            		String model = line.substring(comma1 + 1, comma2).trim();
+	            		debug+=model;
+	            		// Write the model in the tab
+	            		models.add(model);
+	            	}
+            	}
+            }
+
+            request.setAttribute("models", models);
+            request.setAttribute("debug", debug);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.getWriter().write("Error reading file: " + e.getMessage());
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }  
+  
+        
+        
+        /* Dictionary */
+        ArrayList<String> dicts = new ArrayList<>();
+		String filePathDict = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/dictionaries.txt";  
+        BufferedReader readerDict = null;
+        debug="";
+
+        try {
+            readerDict = new BufferedReader(new FileReader(filePathDict));
+            String line;
+            
+            while ((line = readerDict.readLine()) != null) {
+            	if (line.contains(":")) {
+	            	int comma1 = line.indexOf('\'');
+	            	int comma2 = line.indexOf('\'', comma1 + 1);
+	            	debug = debug + line + " " + comma1 +" " + comma2 + " ";
+	            	if(comma1 != -1 && comma2 != -1) {
+	            		String dict = line.substring(comma1 + 1, comma2).trim();
+	            		debug+=dict;
+	            		dicts.add(dict);
+	            	}
+            	}
+            }
+
+            request.setAttribute("dicts", dicts);
+            request.setAttribute("debug", debug);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.getWriter().write("Error reading file: " + e.getMessage());
+        } finally {
+            if (readerDict != null) {
+                try {
+                    readerDict.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }  
+        
+        
+        //////// COLLECT THE MODEL AND DICTIONARY CHOSEN ///////////////
+		
+		String model = "";
+		String dict = "";
+		boolean errorModel = false;
+		boolean errorDict = false;
+		
+		//ATTENTION : Récupérer TOUS les fichiers sélectionnés
+		 Part modelPart = request.getPart("own-model"); //only get the first part of all in own-model
+		 String nomModel = getNomFichier(modelPart);
+		if(!nomModel.isEmpty() && nomModel != null) {
+			String modelName = "";
+			Collection<Part> parts = request.getParts(); //get all the files added in order to know if there is just one or not
+			List<Part> modelFiles = new ArrayList<>();
+			for(Part part : parts) {
+				if(part.getName().equals("own-model") && part.getSubmittedFileName() != null) {
+					modelFiles.add(part);
+				}
+			}
+			
+			System.out.println("size : ");
+			System.out.println(modelFiles.size());
+			if(modelFiles.size() == 1) { //in case there is just the zip file
+				//verify this is really a zip file and get its name
+				Part zipPart = modelFiles.get(0); //get the only part
+				String zipName = zipPart.getSubmittedFileName(); //get its name and extension
+				if(zipName.split("\\.")[1].equals("zip")) {
+					ecrireFichier(zipPart, zipName, MODEL_PATH);
+					modelName = zipName.split("\\.")[0]; 
+				}
+				else {
+					System.out.println("RETURN");
+					request.setAttribute("errorZip", "yes");
+					this.getServletContext().getRequestDispatcher("/WEB-INF/hiddenData.jsp").forward(request, response);
+					return;
+				}		
+			}
+			
+			else {
+				 modelName = request.getParameter("modelName");
+				 if(modelName.equals("")) {
+					System.out.println("RETURN");
+					request.setAttribute("errorName", "yes");
+					this.getServletContext().getRequestDispatcher("/WEB-INF/hiddenData.jsp").forward(request, response);
+					return;
+				 }
+				 modelName = modelName.split("\\.")[0]; //in case an extension is given, we don't want it
+	
+	//		     response.setContentType("application/zip");
+	//		     response.setHeader("Content-Disposition", "attachment;filename=" + modelName);
+				 
+				 File uploadDir = new File(MODEL_PATH, modelName);
+			        if (!uploadDir.exists()) {
+			            uploadDir.mkdirs(); // Crée le répertoire s'il n'existe pas
+			        }
+			        
+			        // Process and store uploaded files
+			        for (Part part : request.getParts()) {
+			            String fileName = part.getSubmittedFileName();
+			            if (fileName != null && !fileName.trim().isEmpty()) {
+			                File file = new File(uploadDir, fileName);
+			                try (InputStream inputStream = part.getInputStream();
+			                     FileOutputStream fos = new FileOutputStream(file)) {
+			                    byte[] buffer = new byte[1024];
+			                    int len;
+			                    while ((len = inputStream.read(buffer)) > 0) {
+			                        fos.write(buffer, 0, len);
+			                    }
+			                }
+			            }
+			        }
+	
+			        // Nom du fichier ZIP que vous souhaitez créer
+			        String zipFileName = modelName + ".zip";
+			        File zipFile = new File(MODEL_PATH, zipFileName);
+	
+			        // Create a ZipOutputStream to write the ZIP
+			        try (FileOutputStream fos = new FileOutputStream(zipFile);
+			             ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(fos))) {
+	
+	//		            for (Part part : request.getParts()) {
+	//		                String fileName = part.getSubmittedFileName();
+	//		                if (fileName != null && !fileName.trim().isEmpty()) {
+	//		                    // Create a new ZipEntry for each file
+	//		                    ZipEntry zipEntry = new ZipEntry(fileName);
+	//		                    zos.putNextEntry(zipEntry);
+	//
+	//		                    // Read the file and write it in the zip
+	////		                    try (FileInputStream fis = new FileInputStream(new File(fileName))) {
+	////		                        byte[] buffer = new byte[TAILLE_TAMPON];
+	////		                        int len;
+	////		                        while ((len = fis.read(buffer)) > 0) {
+	////		                            zos.write(buffer, 0, len);
+	////		                        }
+	////		                    }
+	//		                    try (InputStream inputStream = part.getInputStream()) {
+	//		                        byte[] buffer = new byte[1024];
+	//		                        int len;
+	//		                        while ((len = inputStream.read(buffer)) > 0) {
+	//		                            zos.write(buffer, 0, len);
+	//		                        }
+	//		                    }
+			            // Add files from the directory to the ZIP file
+	
+			            // Add the directory to the ZIP file
+			            zipDirectory(uploadDir, uploadDir.getName(), zos);
+	//		        
+	//		                    zos.closeEntry();
+			    
+			        } catch (Exception e) {
+			            e.printStackTrace();
+			            response.getWriter().println("Une erreur s'est produite lors de la création du fichier ZIP.");
+			            response.getWriter().println("Message d'erreur : " + e.getMessage());
+			        }
+		        }
+			
+				//// MODEL VALIDATION
+		        boolean success;
+		        String commands[] = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
+						 "mfa model inspect acoustic " + modelName,
+						 "conda deactivate"};
+		        try {
+					 success = executeCommandsValidate(commands);
+					 if(success == false) {
+						 Path path = Paths.get(MODEL_PATH + modelName + ".zip");
+					     try {
+					            Files.delete(path);
+					        } catch (IOException e) {
+					            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting file: " + e.getMessage());
+					        }
+//						 Files.deleteIfExists(path);
+						 errorModel = true;
+						 request.setAttribute("errorModel", "yes");
+					 }
+					 else {
+						 model = modelName;
+					 }
+				 } catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+		        
+		}
+		
+		Part dictPart = request.getPart("own-dict");
+		 String nomDict = getNomFichier(dictPart);
+		if(!nomDict.isEmpty() && nomDict != null) {
+			boolean success;
+			ecrireFichier(dictPart, nomDict, DICT_PATH);
+			
+			// DICT VALIDATION
+			 String commands[] = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
+					 "mfa model inspect dictionary " + DICT_PATH + nomDict,
+					 "conda deactivate"};
+			 try {
+				 success = executeCommandsValidate(commands);
+				 
+				 if(success == false) {
+					 Path path = Paths.get(DICT_PATH + nomDict);
+					 Files.deleteIfExists(path);
+					 System.out.println("Delete dict");
+					 errorDict = true;
+					 request.setAttribute("errorDict", "yes");
+				 }
+				 else {
+					 dict = nomDict.split("\\.")[0].trim();
+				 }
+			 } catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				}
+		}
+		
+		//If there is no own model or dictionary
+		if(model.equals("")) {
+			model = request.getParameter("model");
+		}
+		if(dict.equals("")) {
+			dict = request.getParameter("dict");
+		}
+
+		request.setAttribute("model", model);
+		request.setAttribute("dict", dict);
+
+		///////// ALIGNMENT WITH MFA ////////////
+		
+		if(errorDict || errorModel) { //If the user wanted to add its own model or dictionary but it failed
+			System.out.println("RETURN");
+			this.getServletContext().getRequestDispatcher("/WEB-INF/hiddenData.jsp").forward(request, response);
+			return;
+		}
+		try {
+			System.out.println("IN ALIGNMENT !");
+			File modelFile = new File("/home/lucie/Documents/MFA/pretrained_models/acoustic/" + model + ".zip");
+			File dictFile = new File("/home/lucie/Documents/MFA/pretrained_models/dictionary/" + dict + ".dict");
+
+//        	System.out.println(modelFile.getName());
+//        	System.out.println(dictFile.getName());
+
+			if (!modelFile.isFile() && !dictFile.isFile()) { // check if it is not a directory and if it exists at the
+																// same time
+				System.out.println("commande nn");
+				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
+						"mfa model download acoustic " + " " + model, "mfa model download dictionary " + " " + dict,
+						"mfa align --clean " + INPUT_PATH + " " + dict + " " + model + " " + OUTPUT_PATH,
+						"conda deactivate" };
+
+				try {
+					executeCommandsSequentially(commands);
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			} else if (!modelFile.isFile() && dictFile.isFile()) {
+				System.out.println("commande yn");
+				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
+						"mfa model download acoustic " + " " + model,
+						"mfa align --clean " + INPUT_PATH + " " + dict + " " + model + " " + OUTPUT_PATH,
+						"conda deactivate" };
+				try {
+					executeCommandsSequentially(commands);
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			} else if (modelFile.isFile() && !dictFile.isFile()) {
+				System.out.println("commande ny");
+				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
+						"mfa model download dictionary " + " " + dict,
+						"mfa align --clean " + INPUT_PATH + " " + dict + " " + model + " " + OUTPUT_PATH,
+						"conda deactivate" };
+
+				try {
+					executeCommandsSequentially(commands);
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			} else {
+				System.out.println("commande yy");
+				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
+						"mfa align --clean " + INPUT_PATH + " " + dict + " " + model + " " + OUTPUT_PATH,
+						"conda deactivate" };
+				try {
+					System.out.println("try start");
+					executeCommandsSequentially(commands);
+					System.out.println("try end");
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			}
+
+			String resultMessage = "Alignement terminé avec succès !";
+			request.setAttribute("resultMessage", resultMessage);
+		} catch (Exception e) {
+			e.printStackTrace();
+			String errorMessage = "Erreur lors de l'alignement : " + e.getMessage();
+			request.setAttribute("errorMessage", errorMessage);
+		}
+
+		////////////// PRINT THE TEXT ////////////
+
+		ArrayList<Interval> wordIntervals = new ArrayList<>();
+		ArrayList<Interval> phonemeIntervals = new ArrayList<>();
+
+		String directoryPath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
 		File folder = new File(directoryPath);
 		File[] files = folder.listFiles();
 		File result = files[0];
