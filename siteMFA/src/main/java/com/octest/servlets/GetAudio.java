@@ -25,7 +25,8 @@ public class GetAudio extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/plain");
 		
-		String directoryPath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/input/";
+		 String webAppPath = getServletContext().getRealPath("/");
+		String directoryPath = webAppPath + "input/";
 		 File folder = new File(directoryPath);
 		 File[] files = folder.listFiles();
 		 File inputFile1 = files[0];

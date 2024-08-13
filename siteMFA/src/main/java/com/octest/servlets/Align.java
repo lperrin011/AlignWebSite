@@ -46,8 +46,8 @@ public class Align extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	public static final int TAILLE_TAMPON = 10240;
-	public static final String INPUT_PATH = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/input/";
-	public static final String OUTPUT_PATH = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
+	public static final String INPUT_PATH = "input/";
+	public static final String OUTPUT_PATH = "output/";
 	public static final String MODEL_PATH = "/home/lucie/Documents/MFA/pretrained_models/acoustic/";
 	public static final String DICT_PATH = "/home/lucie/Documents/MFA/pretrained_models/dictionary/";
 
@@ -174,12 +174,14 @@ public class Align extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
+		 String webAppPath = getServletContext().getRealPath("/");
+		
 		 ///////// LISTE DES MODELES ET DICTIONNAIRES //////////
         // Useful here in case there is an error so we need to print the data page
 		
         /* Models */
         ArrayList<String> models = new ArrayList<>();
-		String filePath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/models.txt";  
+		String filePath = webAppPath + "models.txt";  
         BufferedReader reader = null;
 		String debug ="";
 
@@ -224,7 +226,7 @@ public class Align extends HttpServlet {
         
         /* Dictionary */
         ArrayList<String> dicts = new ArrayList<>();
-		String filePathDict = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/dictionaries.txt";  
+		String filePathDict = webAppPath + "dictionaries.txt";  
         BufferedReader readerDict = null;
         debug="";
 
@@ -464,7 +466,7 @@ public class Align extends HttpServlet {
 				System.out.println("commande nn");
 				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
 						"mfa model download acoustic " + " " + model, "mfa model download dictionary " + " " + dict,
-						"mfa align --clean " + INPUT_PATH + " " + dict + " " + model + " " + OUTPUT_PATH,
+						"mfa align --clean " + webAppPath + INPUT_PATH + " " + dict + " " + model + " " + webAppPath + OUTPUT_PATH,
 						"conda deactivate" };
 
 				try {
@@ -477,7 +479,7 @@ public class Align extends HttpServlet {
 				System.out.println("commande yn");
 				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
 						"mfa model download acoustic " + " " + model,
-						"mfa align --clean " + INPUT_PATH + " " + dict + " " + model + " " + OUTPUT_PATH,
+						"mfa align --clean " + webAppPath + INPUT_PATH + " " + dict + " " + model + " " + webAppPath + OUTPUT_PATH,
 						"conda deactivate" };
 				try {
 					executeCommandsSequentially(commands);
@@ -489,7 +491,7 @@ public class Align extends HttpServlet {
 				System.out.println("commande ny");
 				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
 						"mfa model download dictionary " + " " + dict,
-						"mfa align --clean " + INPUT_PATH + " " + dict + " " + model + " " + OUTPUT_PATH,
+						"mfa align --clean " + webAppPath + INPUT_PATH + " " + dict + " " + model + " " + webAppPath + OUTPUT_PATH,
 						"conda deactivate" };
 
 				try {
@@ -501,7 +503,7 @@ public class Align extends HttpServlet {
 			} else {
 				System.out.println("commande yy");
 				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
-						"mfa align --clean " + INPUT_PATH + " " + dict + " " + model + " " + OUTPUT_PATH,
+						"mfa align --clean " + webAppPath + INPUT_PATH + " " + dict + " " + model + " " + webAppPath + OUTPUT_PATH,
 						"conda deactivate" };
 				try {
 					System.out.println("try start");
@@ -526,7 +528,7 @@ public class Align extends HttpServlet {
 		ArrayList<Interval> wordIntervals = new ArrayList<>();
 		ArrayList<Interval> phonemeIntervals = new ArrayList<>();
 
-		String directoryPath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
+		String directoryPath = webAppPath + OUTPUT_PATH;
 		File folder = new File(directoryPath);
 		File[] files = folder.listFiles();
 		File result = files[0];

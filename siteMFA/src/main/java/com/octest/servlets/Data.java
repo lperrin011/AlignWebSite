@@ -28,8 +28,8 @@ public class Data extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
     public static final int TAILLE_TAMPON = 10240;
-    public static final String CHEMIN_FICHIERS = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/input/";
-    public static final String CHEMIN_SORTIE = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
+    public static final String CHEMIN_FICHIERS = "input/";
+    public static final String CHEMIN_SORTIE = "output/";
     
        
  
@@ -46,13 +46,15 @@ public class Data extends HttpServlet {
 		
 		/////// ENREGISTREMENT DES FICHIERS /////////
 		
+	    String webAppPath = getServletContext().getRealPath("/");
+		
 		//Delete existing files in input and output directories
-		File directory = new File(CHEMIN_FICHIERS);
+		File directory = new File(webAppPath + CHEMIN_FICHIERS);
         if (directory.exists() && directory.isDirectory()) {
             deleteDirectoryContents(directory);
         } 
 
-        directory = new File(CHEMIN_SORTIE);
+        directory = new File(webAppPath + CHEMIN_SORTIE);
         if (directory.exists() && directory.isDirectory()) {
             deleteDirectoryContents(directory);
         } 
@@ -121,9 +123,9 @@ public class Data extends HttpServlet {
             	String nomChamp2 = part2.getName();
 
                 // Function that write the file
-                ecrireFichier(part, nomFichier, CHEMIN_FICHIERS);
-                ecrireFichier(part, nomFichier, "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/");
-                ecrireFichier(part2, nomFichier2, CHEMIN_FICHIERS);
+                ecrireFichier(part, nomFichier, webAppPath + CHEMIN_FICHIERS);
+//                ecrireFichier(part, nomFichier, "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/");
+                ecrireFichier(part2, nomFichier2, webAppPath + CHEMIN_FICHIERS);
 
                 // Allows to print the name of the file given by the user on the page and to display the model part of the page
                 request.setAttribute(nomChamp, nomFichier);
@@ -156,7 +158,7 @@ public class Data extends HttpServlet {
          
         /* Models */
         ArrayList<String> models = new ArrayList<>();
-		String filePath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/models.txt";  
+		String filePath = webAppPath + "models.txt";  
         BufferedReader reader = null;
 		String debug ="";
 
@@ -201,7 +203,7 @@ public class Data extends HttpServlet {
         
         /* Dictionary */
         ArrayList<String> dicts = new ArrayList<>();
-		String filePathDict = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/dictionaries.txt";  
+		String filePathDict = webAppPath + "dictionaries.txt";  
         BufferedReader readerDict = null;
         debug="";
 

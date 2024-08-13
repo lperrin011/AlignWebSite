@@ -4,7 +4,7 @@
     <servlet-name>Test</servlet-name>
     <servlet-class>com.octest.servlets.Test</servlet-class>
     <multipart-config>
-      <location>/siteMFA/fichierstmp/</location>
+      <location>/home/lucie/git/repository/siteMFA/src/main/webapp/fichierstmp/</location>
       <max-file-size>10485760</max-file-size>
       <max-request-size>52428800</max-request-size>
       <file-size-threshold>1048576</file-size-threshold>
@@ -18,7 +18,7 @@
     <servlet-name>Data</servlet-name>
     <servlet-class>com.octest.servlets.Data</servlet-class>
     <multipart-config>
-      <location>/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/fichierstmp/</location>
+      <location>/home/lucie/git/repository/siteMFA/src/main/webapp/fichierstmp/</location>
       <max-file-size>10485760</max-file-size>
       <max-request-size>52428800</max-request-size>
       <file-size-threshold>1048576</file-size-threshold>
@@ -32,7 +32,7 @@
     <servlet-name>Align</servlet-name>
     <servlet-class>com.octest.servlets.Align</servlet-class>
     <multipart-config>
-      <location>/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/fichierstmp/</location>
+      <location>/home/lucie/git/repository/siteMFA/src/main/webapp/fichierstmp/</location>
       <max-file-size>209715200</max-file-size>
       <max-request-size>314572800</max-request-size>
       <file-size-threshold>1048576</file-size-threshold>
@@ -57,14 +57,6 @@
   <servlet-mapping>
     <servlet-name>Download</servlet-name>
     <url-pattern>/Download</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <servlet-name>Lucie</servlet-name>
-    <servlet-class>com.octest.servlets.Lucie</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>Lucie</servlet-name>
-    <url-pattern>/lucie</url-pattern>
   </servlet-mapping>
   <servlet>
     <servlet-name>printText</servlet-name>

@@ -31,7 +31,8 @@ public class Model extends HttpServlet {
 			ArrayList<String> models = new ArrayList<>();
 			String debug ="";
 			
-			String filePath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/models.txt";  
+			String webAppPath = getServletContext().getRealPath("/");
+			String filePath = webAppPath + "models.txt";  
 	        BufferedReader reader = null;
 
 	        try {

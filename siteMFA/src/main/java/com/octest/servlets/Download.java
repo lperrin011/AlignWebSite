@@ -26,7 +26,8 @@ public class Download extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// String directoryPath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
-		 String directoryPath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
+		 String webAppPath = getServletContext().getRealPath("/");
+		 String directoryPath = webAppPath + "output/";
 		 File folder = new File(directoryPath);
 		 File[] files = folder.listFiles();
 		 File result = files[0];
