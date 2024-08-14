@@ -39,7 +39,6 @@
 		<h1 class="big-title">Phonetic forced-aligner</h1>
 
 	</section>
-
 	
 			
 		<%-- 	<p>Modèle acoustique choisi : <%= request.getAttribute("model") %></p>
