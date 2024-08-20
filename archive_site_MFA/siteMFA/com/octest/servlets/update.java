@@ -7,8 +7,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class update extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -51,17 +53,17 @@ public class update extends HttpServlet {
             Process process = processBuilder.start();
             
             // output answer of the shell script
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader reader2 = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             
-            String line;
+            String line2;
             StringBuilder output = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+            while ((line2 = reader2.readLine()) != null) {
+                output.append(line2).append("\n");
             }
             StringBuilder errorOutput = new StringBuilder();
-            while ((line = errorReader.readLine()) != null) {
-                errorOutput.append(line).append("\n");
+            while ((line2 = errorReader.readLine()) != null) {
+                errorOutput.append(line2).append("\n");
             }
             
             // Wait until the script is done
@@ -74,7 +76,95 @@ public class update extends HttpServlet {
             System.out.println(errorOutput);
             System.out.println("Exited with code: " + exitCode);
             
-            this.getServletContext().getRequestDispatcher("/WEB-INF/data.jsp").forward(request, response);
+            
+            ///////// LISTE DES MODELES ET DICTIONNAIRES //////////
+            // Useful here in case there is an error so we need to print the data page
+    		
+            /* Models */
+            ArrayList<String> models = new ArrayList<>();
+    		String filePath = webAppPath + "models.txt";  
+            BufferedReader reader = null;
+    		String debug ="";
+
+
+            try {
+                reader = new BufferedReader(new FileReader(filePath));
+                String line;
+
+               
+                while ((line = reader.readLine()) != null) {
+                	// Get the name of the model
+                	if (line.contains(":")) {
+    	            	int comma1 = line.indexOf('\'');
+    	            	int comma2 = line.indexOf('\'', comma1 + 1);
+    	            	debug = debug + line + " " + comma1 +" " + comma2 + " ";
+    	            	if(comma1 != -1 && comma2 != -1) {
+    	            		String model = line.substring(comma1 + 1, comma2).trim();
+    	            		debug+=model;
+    	            		// Write the model in the tab
+    	            		models.add(model);
+    	            	}
+                	}
+                }
+
+                request.setAttribute("models", models);
+                request.setAttribute("debug", debug);
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+                response.getWriter().write("Error reading file: " + e.getMessage());
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }  
+      
+            
+            
+            /* Dictionary */
+            ArrayList<String> dicts = new ArrayList<>();
+    		String filePathDict = webAppPath + "dictionaries.txt";  
+            BufferedReader readerDict = null;
+            debug="";
+
+            try {
+                readerDict = new BufferedReader(new FileReader(filePathDict));
+                String line;
+                
+                while ((line = readerDict.readLine()) != null) {
+                	if (line.contains(":")) {
+    	            	int comma1 = line.indexOf('\'');
+    	            	int comma2 = line.indexOf('\'', comma1 + 1);
+    	            	debug = debug + line + " " + comma1 +" " + comma2 + " ";
+    	            	if(comma1 != -1 && comma2 != -1) {
+    	            		String dict = line.substring(comma1 + 1, comma2).trim();
+    	            		debug+=dict;
+    	            		dicts.add(dict);
+    	            	}
+                	}
+                }
+
+                request.setAttribute("dicts", dicts);
+                request.setAttribute("debug", debug);
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+                response.getWriter().write("Error reading file: " + e.getMessage());
+            } finally {
+                if (readerDict != null) {
+                    try {
+                        readerDict.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }  
+            
+            this.getServletContext().getRequestDispatcher("/WEB-INF/hiddenData.jsp").forward(request, response);
 //            // Envoyez la réponse au client
 //            response.setContentType("text/plain");
 //            response.getWriter().write("Script executed with exit code: " + exitCode + "\nOutput:\n" + output + "\nErrors:\n" + errorOutput);

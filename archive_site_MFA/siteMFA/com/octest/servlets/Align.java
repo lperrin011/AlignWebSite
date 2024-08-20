@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 
 
 
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,16 +32,7 @@ import java.io.InputStreamReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.octest.beans.Interval;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Align extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -51,7 +43,6 @@ public class Align extends HttpServlet {
 	public static final String MODEL_PATH = "/home/lucie/Documents/MFA/pretrained_models/acoustic/";
 	public static final String DICT_PATH = "/home/lucie/Documents/MFA/pretrained_models/dictionary/";
 
-//	private static AtomicInteger progress = new AtomicInteger(0);
 
 	public Align() {
 		super();
@@ -147,29 +138,7 @@ public class Align extends HttpServlet {
 		return isValid;
 		
 	}
-
-//	private void updateProgress(String line) {
-//		// progression update
-//		if (line.contains("Generating MFCCs")) {
-//			progress.set(10);
-//		} else if (line.contains("Calculating CMVN")) {
-//			progress.set(20);
-//		} else if (line.contains("Creating corpus split")) {
-//			progress.set(30);
-//		} else if (line.contains("Compiling training graphs")) {
-//			progress.set(40);
-//		} else if (line.contains("Calculating fMLLR for speaker adaptation")) {
-//			progress.set(50);
-//		} else if (line.contains("Generating alignments")) {
-//			progress.set(60);
-//		} else if (line.contains("Collecting phone and word alignments from alignment lattices")) {
-//			progress.set(70);
-//		} else if (line.contains("Exporting alignment TextGrids")) {
-//			progress.set(80);
-//		} else if (line.contains("Done!")) {
-//			progress.set(100);
-//		}
-//	}
+	
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {

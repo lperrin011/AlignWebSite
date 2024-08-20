@@ -59,7 +59,7 @@
 				<br> <input class="data-submit" type="submit" value="OK" title="Validate input files">
 			</form>
 			
-			<!-- Print an error or success message depending on if files are filled -->
+			<!-- Print an error or success message depending on if files are filled and the types are good -->
 			<p>
 			<span class="error-message">
 			${ !empty isAudio && !empty isText ? "Please load data files" : ""} 
@@ -71,6 +71,7 @@
 			${ !empty pbAudioType ? "The format of the audio file is not supported by the MFA. All audio formats are supported by the MFA but WAV format gives better precision." : ""} 
 			${ !empty pbTextType ? "The format of the transcription file is not supported by the MFA. Supported transcription formats are txt, lab and TextGrid." : ""}
 			${ !empty pbAudioText ? "The formats of the transcription and the audio files are not supported by the MFA. " : ""} </span>
+			
 			<span class="success-message">${ !empty end ? "Files successfully saved" : ""} </span>
 			</p>
 
@@ -80,6 +81,7 @@
 	
 	
 
+	<!-- In case provided files are good, display the model part -->
 	<% String audio = (String) request.getAttribute("audio");
 	String text = (String) request.getAttribute("text"); %>
 	<% if (audio != null && !audio.isEmpty() && text != null && !text.isEmpty()) { %>
@@ -176,7 +178,7 @@
 							
 							<p>It has to contain <strong>2 columns</strong> separated by a tab : the left column is the <strong>list of words</strong> and the right column is the <strong>
 							list of phonetic pronunciations</strong>. 
-							If the dictionary has pronunciation probabilities, you can add a third column in the center.</p><br> <br>
+							If the dictionary has pronunciation probabilities, you can add a third column in the center.</p>
 							<p>
 							For more details and examples, please check the <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/dictionary.html" class="doc-link">MFA documentation</a>.
 							</p>
@@ -190,8 +192,6 @@
 					<script src="js/hidden.js"></script>
 				</div>
 				<p class="error-message">
-			${ !empty errorModel ? "The model chosen is not valid" : ""} 
-			${ !empty errorDict ? "The dictionary chosen is not valid" : ""} </p>
 				
 
 				<button class="align-button" type="submit" title="Launch the alignment">Align</button>

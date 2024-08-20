@@ -3,15 +3,11 @@ package com.octest.servlets;
 import jakarta.servlet.ServletException;
 
 
-//import jakarta.servlet.annotation.WebServlet;
-//import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
-//import java.io.PrintWriter;
-//import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.BufferedInputStream;
@@ -20,8 +16,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-//import java.io.IOException;
-//import java.io.InputStream;
 
 
 public class Data extends HttpServlet {
@@ -44,8 +38,6 @@ public class Data extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		/////// ENREGISTREMENT DES FICHIERS /////////
-		
 	    String webAppPath = getServletContext().getRealPath("/");
 		
 		//Delete existing files in input and output directories
@@ -59,27 +51,22 @@ public class Data extends HttpServlet {
             deleteDirectoryContents(directory);
         } 
         
-        // Audio
+        // Get audio file information
         Part part = request.getPart("audio");
-        
         String nomFichier = getNomFichier(part);
-        request.setAttribute("name", nomFichier);
-        
         String type = part.getContentType();
         
-        // Text
+        // Get text file information
         Part part2 = request.getPart("text");
-        
         String type2 = part2.getContentType();
-        
         String nomFichier2 = getNomFichier(part2);
-        request.setAttribute("name2", nomFichier2);
        
+        
+        //////// VERIFICATIONS ///////////
         
         //Verify if data as been provided
         if (nomFichier == null || nomFichier.isEmpty() || nomFichier2 == null || nomFichier2.isEmpty()) {
         	//Figure out which files are missing
-        	
         	if(nomFichier == null || nomFichier.isEmpty()){
         		request.setAttribute("isAudio", "no");
         	}
@@ -118,13 +105,15 @@ public class Data extends HttpServlet {
         	}
         	
         	
+        	
+    		/////// SAVING FILES /////////
+        	
         	if(audioType == true && textType == true) { //In case both types are supported, we can write them
         		String nomChamp = part.getName();
             	String nomChamp2 = part2.getName();
 
                 // Function that write the file
                 ecrireFichier(part, nomFichier, webAppPath + CHEMIN_FICHIERS);
-//                ecrireFichier(part, nomFichier, "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/");
                 ecrireFichier(part2, nomFichier2, webAppPath + CHEMIN_FICHIERS);
 
                 // Allows to print the name of the file given by the user on the page and to display the model part of the page
@@ -142,19 +131,17 @@ public class Data extends HttpServlet {
         	else if(textType == false) {
         		request.setAttribute("pbTextType", "y");
         	}
-        	//Print success mssage
+        	//Print success message
         	else {
         		request.setAttribute("end", "ok");
         	}
         	
         }
         
-        
-   
-        
+             
       
       
-        ///////// LISTE DES MODELES ET DICTIONNAIRES //////////
+        ///////// LISTE OF MODELS ET DICTIONARIES //////////
          
         /* Models */
         ArrayList<String> models = new ArrayList<>();
@@ -173,10 +160,8 @@ public class Data extends HttpServlet {
             	if (line.contains(":")) {
 	            	int comma1 = line.indexOf('\'');
 	            	int comma2 = line.indexOf('\'', comma1 + 1);
-	            	debug = debug + line + " " + comma1 +" " + comma2 + " ";
 	            	if(comma1 != -1 && comma2 != -1) {
 	            		String model = line.substring(comma1 + 1, comma2).trim();
-	            		debug+=model;
 	            		// Write the model in the tab
 	            		models.add(model);
 	            	}
@@ -184,7 +169,6 @@ public class Data extends HttpServlet {
             }
 
             request.setAttribute("models", models);
-            request.setAttribute("debug", debug);
             
         } catch (IOException e) {
             e.printStackTrace();
@@ -215,17 +199,14 @@ public class Data extends HttpServlet {
             	if (line.contains(":")) {
 	            	int comma1 = line.indexOf('\'');
 	            	int comma2 = line.indexOf('\'', comma1 + 1);
-	            	debug = debug + line + " " + comma1 +" " + comma2 + " ";
 	            	if(comma1 != -1 && comma2 != -1) {
 	            		String dict = line.substring(comma1 + 1, comma2).trim();
-	            		debug+=dict;
 	            		dicts.add(dict);
 	            	}
             	}
             }
 
             request.setAttribute("dicts", dicts);
-            request.setAttribute("debug", debug);
             
         } catch (IOException e) {
             e.printStackTrace();
