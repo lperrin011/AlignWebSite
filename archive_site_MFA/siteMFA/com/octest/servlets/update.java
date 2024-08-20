@@ -20,22 +20,9 @@ public class update extends HttpServlet {
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//		String[] commands = {
-//                "source /home/lucie/miniconda3/etc/profile.d/conda.sh",
-//                "conda activate aligner",
-//                "mfa model download acoustic > models.txt",
-//                "mfa model download dictionary > dictionaries.txt",
-//                "conda deactivate"
-//            };
-//		
-//        try {
-//           executeCommandsSequentially(commands);
-//        } catch (IOException | InterruptedException e) {
-//                e.printStackTrace();
-//            
-//        }
-//		this.getServletContext().getRequestDispatcher("/WEB-INF/data.jsp").forward(request, response);
+		doPost(request, response);
 	}
+	
 
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -45,40 +32,54 @@ public class update extends HttpServlet {
 //        ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", scriptPath);
 		
 		String webAppPath = getServletContext().getRealPath("/");
-		String scriptPath = webAppPath + "lists.sh";
-		
-		ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", scriptPath);
+		System.out.println(webAppPath);
+//		String scriptPath = webAppPath + "lists.sh";
+//		
+//		ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", scriptPath);
         
         try {
-            Process process = processBuilder.start();
+//            Process process = processBuilder.start();
             
             // output answer of the shell script
-            BufferedReader reader2 = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+//            BufferedReader reader2 = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+//            
+//            String line2;
+//            StringBuilder output = new StringBuilder();
+//            while ((line2 = reader2.readLine()) != null) {
+//                output.append(line2).append("\n");
+//            }
+//            StringBuilder errorOutput = new StringBuilder();
+//            while ((line2 = errorReader.readLine()) != null) {
+//                errorOutput.append(line2).append("\n");
+//            }
+//            
+//            // Wait until the script is done
+//            int exitCode = process.waitFor();
+//            
+//            // Print the output
+//            System.out.println("Output:");
+//            System.out.println(output);
+//            System.out.println("Errors:");
+//            System.out.println(errorOutput);
+//            System.out.println("Exited with code: " + exitCode);
             
-            String line2;
-            StringBuilder output = new StringBuilder();
-            while ((line2 = reader2.readLine()) != null) {
-                output.append(line2).append("\n");
-            }
-            StringBuilder errorOutput = new StringBuilder();
-            while ((line2 = errorReader.readLine()) != null) {
-                errorOutput.append(line2).append("\n");
-            }
             
-            // Wait until the script is done
-            int exitCode = process.waitFor();
-            
-            // Print the output
-            System.out.println("Output:");
-            System.out.println(output);
-            System.out.println("Errors:");
-            System.out.println(errorOutput);
-            System.out.println("Exited with code: " + exitCode);
+            String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
+					"mfa model download acoustic > " + webAppPath + "models.txt",
+					"mfa model download dictionary > " + webAppPath + "dictionaries.txt",
+					"conda deactivate" };
+
+			try {
+				executeCommandsSequentially(commands);
+			} catch (IOException | InterruptedException e) {
+				e.printStackTrace();
+			}
+
             
             
             ///////// LISTE DES MODELES ET DICTIONNAIRES //////////
-            // Useful here in case there is an error so we need to print the data page
+            // Useful here because we display hiddenData page
     		
             /* Models */
             ArrayList<String> models = new ArrayList<>();
@@ -169,7 +170,7 @@ public class update extends HttpServlet {
 //            response.setContentType("text/plain");
 //            response.getWriter().write("Script executed with exit code: " + exitCode + "\nOutput:\n" + output + "\nErrors:\n" + errorOutput);
             
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error executing script: " + e.getMessage());
         }
