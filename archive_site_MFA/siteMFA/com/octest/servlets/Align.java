@@ -53,23 +53,25 @@ public class Align extends HttpServlet {
 		response.setContentType("application/json");
 	}
 
+	// Execute the commands and return true if the execution has succeeded and false otherwise
 	private boolean executeCommandsSequentially(String[] commands) throws IOException, InterruptedException {
-		// Commande complète à exécuter
+		// Concatenate the several commands
 		String command = String.join(" && ", commands);
 		boolean success = true;
 
-		// Utilisation de ProcessBuilder pour exécuter les commandes
-		ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
+		ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command); //it is shell commands
 		processBuilder.redirectErrorStream(true);
 
+		// launch the command with processBuilder
 		Process process = processBuilder.start();
-		System.out.println("in execute command");
+		System.out.println("in execute command"); //debugging
 		StringBuilder output = new StringBuilder();
 		StringBuilder errorOutput = new StringBuilder();
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 				BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 			String line;
+			//get the output
 			while ((line = reader.readLine()) != null) {
 				System.out.println(line);
 				output.append(line).append("\n");
@@ -89,18 +91,17 @@ public class Align extends HttpServlet {
 			process.destroy();
 		}
 
-		System.out.println("Commande exécutée avec succès : " + output.toString());
+		System.out.println("Commande exécutée avec succès !");
 		return success;
 		
 
 	}
 	
+	// Same as function executeCommandsSequentially but adapted for model validation
 	private boolean executeCommandsValidate(String[] commands) throws IOException, InterruptedException {
-		// Commande complète à exécuter
 		String command = String.join(" && ", commands);
 		boolean isValid = true;
 
-		// Utilisation de ProcessBuilder pour exécuter les commandes
 		ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
 		processBuilder.redirectErrorStream(true);
 
@@ -115,6 +116,7 @@ public class Align extends HttpServlet {
 			while ((line = reader.readLine()) != null) {
 				System.out.println(line);
 				output.append(line).append("\n");
+				// if the output contains False for some of the required elements, it is not valid
 				 if (line.contains("False")) {
 		                isValid = false;
 		         }
@@ -129,14 +131,12 @@ public class Align extends HttpServlet {
 				isValid = false;
 			}
 		} finally {
-			// Ensure that the output stream is closed and the process is destroyed
 			process.getOutputStream().close();
 			process.destroy();
 		}
 
-		System.out.println("Commande exécutée avec succès : " + output.toString());
-		return isValid;
-		
+		System.out.println("Commande exécutée avec succès !");
+		return isValid;	
 	}
 	
 
@@ -145,7 +145,7 @@ public class Align extends HttpServlet {
 		
 		 String webAppPath = getServletContext().getRealPath("/");
 		
-		 ///////// LISTE DES MODELES ET DICTIONNAIRES //////////
+		 ///////// MODELS AND DICTIONARY LISTS //////////
         // Useful here in case there is an error so we need to print the data page
 		
         /* Models */
@@ -174,7 +174,6 @@ public class Align extends HttpServlet {
 	            	}
             	}
             }
-
             request.setAttribute("models", models);
             request.setAttribute("debug", debug);
             
@@ -191,8 +190,7 @@ public class Align extends HttpServlet {
             }
         }  
   
-        
-        
+               
         /* Dictionary */
         ArrayList<String> dicts = new ArrayList<>();
 		String filePathDict = webAppPath + "dictionaries.txt";  
@@ -240,8 +238,8 @@ public class Align extends HttpServlet {
 		boolean errorModel = false;
 		boolean errorDict = false;
 		
-		//ATTENTION : Récupérer TOUS les fichiers sélectionnés
-		 Part modelPart = request.getPart("own-model"); //only get the first part of all in own-model
+		//ATTENTION : get all selected files !
+		 Part modelPart = request.getPart("own-model"); //only get the first part of all in own-model to verify it is not empty
 		 String nomModel = getNomFichier(modelPart);
 		if(!nomModel.isEmpty() && nomModel != null) {
 			String modelName = "";
@@ -264,6 +262,7 @@ public class Align extends HttpServlet {
 					modelName = zipName.split("\\.")[0]; 
 				}
 				else {
+					// If there is an error, display the hiddenData page
 					System.out.println("RETURN");
 					request.setAttribute("errorZip", "yes");
 					this.getServletContext().getRequestDispatcher("/WEB-INF/hiddenData.jsp").forward(request, response);
@@ -272,6 +271,7 @@ public class Align extends HttpServlet {
 			}
 			
 			else {
+				//in case there are all the files of the model, we need the name of the model to create the zip file
 				 modelName = request.getParameter("modelName");
 				 if(modelName.equals("")) {
 					System.out.println("RETURN");
@@ -280,13 +280,10 @@ public class Align extends HttpServlet {
 					return;
 				 }
 				 modelName = modelName.split("\\.")[0]; //in case an extension is given, we don't want it
-	
-	//		     response.setContentType("application/zip");
-	//		     response.setHeader("Content-Disposition", "attachment;filename=" + modelName);
 				 
 				 File uploadDir = new File(MODEL_PATH, modelName);
 			        if (!uploadDir.exists()) {
-			            uploadDir.mkdirs(); // Crée le répertoire s'il n'existe pas
+			            uploadDir.mkdirs(); // Create directory if it does not exist already
 			        }
 			        
 			        // Process and store uploaded files
@@ -305,43 +302,15 @@ public class Align extends HttpServlet {
 			            }
 			        }
 	
-			        // Nom du fichier ZIP que vous souhaitez créer
 			        String zipFileName = modelName + ".zip";
 			        File zipFile = new File(MODEL_PATH, zipFileName);
 	
 			        // Create a ZipOutputStream to write the ZIP
 			        try (FileOutputStream fos = new FileOutputStream(zipFile);
 			             ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(fos))) {
-	
-	//		            for (Part part : request.getParts()) {
-	//		                String fileName = part.getSubmittedFileName();
-	//		                if (fileName != null && !fileName.trim().isEmpty()) {
-	//		                    // Create a new ZipEntry for each file
-	//		                    ZipEntry zipEntry = new ZipEntry(fileName);
-	//		                    zos.putNextEntry(zipEntry);
-	//
-	//		                    // Read the file and write it in the zip
-	////		                    try (FileInputStream fis = new FileInputStream(new File(fileName))) {
-	////		                        byte[] buffer = new byte[TAILLE_TAMPON];
-	////		                        int len;
-	////		                        while ((len = fis.read(buffer)) > 0) {
-	////		                            zos.write(buffer, 0, len);
-	////		                        }
-	////		                    }
-	//		                    try (InputStream inputStream = part.getInputStream()) {
-	//		                        byte[] buffer = new byte[1024];
-	//		                        int len;
-	//		                        while ((len = inputStream.read(buffer)) > 0) {
-	//		                            zos.write(buffer, 0, len);
-	//		                        }
-	//		                    }
-			            // Add files from the directory to the ZIP file
-	
-			            // Add the directory to the ZIP file
-			            zipDirectory(uploadDir, uploadDir.getName(), zos);
-	//		        
-	//		                    zos.closeEntry();
-			    
+			            // Create the ZIP file of the provided directory
+			        	zipDirectory(uploadDir, uploadDir.getName(), zos);
+			        	
 			        } catch (Exception e) {
 			            e.printStackTrace();
 			            response.getWriter().println("Une erreur s'est produite lors de la création du fichier ZIP.");
@@ -356,24 +325,22 @@ public class Align extends HttpServlet {
 						 "conda deactivate"};
 		        try {
 					 success = executeCommandsValidate(commands);
-					 if(success == false) {
+					 if(success == false) { // If the model is not valid, we delete it
 						 Path path = Paths.get(MODEL_PATH + modelName + ".zip");
 					     try {
 					            Files.delete(path);
 					        } catch (IOException e) {
 					            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting file: " + e.getMessage());
 					        }
-//						 Files.deleteIfExists(path);
-						 errorModel = true;
+						 errorModel = true; // to send the error message later
 						 request.setAttribute("errorModel", "yes");
 					 }
-					 else {
+					 else { //in case the model is valid
 						 model = modelName;
 					 }
 				 } catch (IOException | InterruptedException e) {
 						e.printStackTrace();
-					}
-		        
+					}       
 		}
 		
 		Part dictPart = request.getPart("own-dict");
@@ -387,9 +354,8 @@ public class Align extends HttpServlet {
 					 "mfa model inspect dictionary " + DICT_PATH + nomDict,
 					 "conda deactivate"};
 			 try {
-				 success = executeCommandsValidate(commands);
-				 
-				 if(success == false) {
+				 success = executeCommandsValidate(commands);		 
+				 if(success == false) { // If the dictionary is not valid, we delete it
 					 Path path = Paths.get(DICT_PATH + nomDict);
 					 Files.deleteIfExists(path);
 					 System.out.println("Delete dict");
@@ -397,14 +363,14 @@ public class Align extends HttpServlet {
 					 request.setAttribute("errorDict", "yes");
 				 }
 				 else {
-					 dict = nomDict.split("\\.")[0].trim();
+					 dict = nomDict.split("\\.")[0].trim(); // Remove the extension
 				 }
 			 } catch (IOException | InterruptedException e) {
 					e.printStackTrace();
 				}
 		}
 		
-		//If there is no own model or dictionary
+		//If there is no own model or dictionary, model and dict variables have not been modified
 		if(model.equals("")) {
 			model = request.getParameter("model");
 		}
@@ -423,29 +389,27 @@ public class Align extends HttpServlet {
 			this.getServletContext().getRequestDispatcher("/WEB-INF/hiddenData.jsp").forward(request, response);
 			return;
 		}
+		// If no error, launch the alignment
 		try {
 			System.out.println("IN ALIGNMENT !");
-			File modelFile = new File("/home/lucie/Documents/MFA/pretrained_models/acoustic/" + model + ".zip");
-			File dictFile = new File("/home/lucie/Documents/MFA/pretrained_models/dictionary/" + dict + ".dict");
+			File modelFile = new File(MODEL_PATH + model + ".zip");
+			File dictFile = new File(DICT_PATH + dict + ".dict");
 
-//        	System.out.println(modelFile.getName());
-//        	System.out.println(dictFile.getName());
 
-			if (!modelFile.isFile() && !dictFile.isFile()) { // check if it is not a directory and if it exists at the
-																// same time
+			if (!modelFile.isFile() && !dictFile.isFile()) { // check if it is not a directory and if it exists at the same time
+				// if doesn't already in MFA folder, download them
 				System.out.println("commande nn");
 				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
 						"mfa model download acoustic " + " " + model, "mfa model download dictionary " + " " + dict,
 						"mfa align --clean " + webAppPath + INPUT_PATH + " " + dict + " " + model + " " + webAppPath + OUTPUT_PATH,
 						"conda deactivate" };
-
 				try {
 					executeCommandsSequentially(commands);
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
 				}
 
-			} else if (!modelFile.isFile() && dictFile.isFile()) {
+			} else if (!modelFile.isFile() && dictFile.isFile()) { // if only the dictionary is present, download the model
 				System.out.println("commande yn");
 				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
 						"mfa model download acoustic " + " " + model,
@@ -457,7 +421,7 @@ public class Align extends HttpServlet {
 					e.printStackTrace();
 				}
 
-			} else if (modelFile.isFile() && !dictFile.isFile()) {
+			} else if (modelFile.isFile() && !dictFile.isFile()) { // if only the model is present, download the dictionary
 				System.out.println("commande ny");
 				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
 						"mfa model download dictionary " + " " + dict,
@@ -470,7 +434,7 @@ public class Align extends HttpServlet {
 					e.printStackTrace();
 				}
 
-			} else {
+			} else { // if both the model and the dictionary are already download
 				System.out.println("commande yy");
 				String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
 						"mfa align --clean " + webAppPath + INPUT_PATH + " " + dict + " " + model + " " + webAppPath + OUTPUT_PATH,
@@ -495,19 +459,16 @@ public class Align extends HttpServlet {
 
 		////////////// PRINT THE TEXT ////////////
 
+		// Arrays that will help print the text with the appropriate width
 		ArrayList<Interval> wordIntervals = new ArrayList<>();
 		ArrayList<Interval> phonemeIntervals = new ArrayList<>();
 
+		// find the result file in the output folder
 		String directoryPath = webAppPath + OUTPUT_PATH;
 		File folder = new File(directoryPath);
 		File[] files = folder.listFiles();
 		File result = files[0];
 		try (BufferedReader reader1 = new BufferedReader(new FileReader(directoryPath + result.getName()))) {
-//		try (BufferedReader reader = new BufferedReader(new FileReader("/home/lucie/mica/MFA/Data/output/short.TextGrid"))) {
-//			/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/short.TextGrid
-//			StringBuilder sb = new StringBuilder();
-
-//            ArrayList<StringBuilder> text = new ArrayList<>();
 			String line;
 			boolean words = false;
 			boolean phones = false;
@@ -516,23 +477,24 @@ public class Align extends HttpServlet {
 			float min = 0;
 			float max = 0;
 
+			// Read the result file
 			while ((line = reader1.readLine()) != null) {
 
-				if (line.contains("name = \"words\"")) {
+				if (line.contains("name = \"words\"")) { // from there, text, xmin and xmax will be added to the words array
 					words = true;
 					phones = false;
 				}
 
-				if (line.contains("name = \"phones\"")) {
+				if (line.contains("name = \"phones\"")) { // from there, text, xmin and xmax will be added to the phonemes array
 					words = false;
 					phones = true;
 				}
 
-				if (line.contains("intervals")) {
+				if (line.contains("intervals")) { // this avoid the xmin and xmax at the beginning of a TextGrid file, the total length
 					intervals = true;
 				}
 
-				if (line.contains("item")) {
+				if (line.contains("item")) { // avoid the total length of each item (words and phonemes in this case)
 					intervals = false;
 				}
 
@@ -561,36 +523,20 @@ public class Align extends HttpServlet {
 					if (begin != -1 && end != -1) {
 						String text = line.substring(begin + 1, end).trim();
 
+						// Here we have all information (xmin, xmax and the text) to complete an interval
 						Interval inter = new Interval(text, min, max);
-
+						// And then add it to the good array
 						if (words == true) {
 							wordIntervals.add(inter);
 						}
-
 						if (phones == true) {
 							phonemeIntervals.add(inter);
 						}
-
-//	            		if(!sentence.equals("")) {
-//	            			if(words == true) {
-//	            				sb.append("       ").append(sentence).append("       |");
-//	            			}
-//	            			else {
-//	            				sb.append(" ").append(sentence).append(" |");
-//	            			}
-//	            		}
 					}
 
 				}
 			}
-//            sb.append("\n");
-//            response.getWriter().write(sb.toString());
-//            response.getWriter().write(text.toString());
-//        for(StringBuilder w : text) {
-//        	response.getWriter().write(w.toString());
-//
-//        }
-
+			// Pass the completed arrays to the JSP in order to print it
 			request.setAttribute("wordIntervals", wordIntervals);
 			request.setAttribute("phonemeIntervals", phonemeIntervals);
 

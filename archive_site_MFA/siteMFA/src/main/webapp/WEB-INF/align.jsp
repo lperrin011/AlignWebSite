@@ -21,8 +21,6 @@
 	<link rel="stylesheet"
 		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 	<link rel="icon" href="./images/signal-alt-2.png">
-	<!--  <script src="js/loading.js"></script>  -->
-	
 </head>
 <body>
 	<header class="header">
@@ -40,27 +38,7 @@
 
 	</section>
 	
-			
-		<%-- 	<p>Modèle acoustique choisi : <%= request.getAttribute("model") %></p>
-<p>Dictionnaire de prononciation choisi : <%= request.getAttribute("dict") %></p>
-
-
-       <% if (request.getAttribute("resultMessage") != null) { %>
-        <p style="color: green;"><%= request.getAttribute("resultMessage") %></p>
-    <% } %>
-    
-    Afficher le message d'erreur
-    <% if (request.getAttribute("errorMessage") != null) { %>
-        <p style="color: red;"><%= request.getAttribute("errorMessage") %></p>
-    <% } %> --%>
-    	
-
-
-
-	<!-- <form class="print-form" action="printText" method="get" enctype="multipart/form-data">
-		<input class="print-button" type="submit">	
-	</form> -->
-
+	
 	<section class="result" id="result">
 		<h2 class="title-result">Result</h2>
 		

@@ -11,25 +11,17 @@ let audioNameVariable;
               fetch('/siteMFA/getAudio')
                   .then(response => response.text())
                   .then(audioName => {
-                      // Stocker le résultat dans une variable JavaScript
+                      // Stock the result in a Javascript variable
                       audioNameVariable = audioName.trim();
                       console.log("Audio Name:", audioNameVariable);
 	  			
-					  
-					  /*audioTrack.load('siteMFA/input/' + audioNameVariable);*/
 					  audioTrack.load('/siteMFA/serveFile?fileName=' + encodeURIComponent(audioNameVariable));
-
-					  
-					  
-                      // Utiliser le résultat dans le DOM ou ailleurs
-                  /*    document.getElementById('audioName').textContent = audioNameVariable;*/
                   })
                   .catch(error => {
                       console.error('Error:', error);
                   });
           });
 
-/*audioTrack.load('audio/short.wav');*/
 const playBtn = document.querySelector(".play-btn");
 const stopBtn = document.querySelector(".stop-btn");
 const muteBtn = document.querySelector(".mute-btn");

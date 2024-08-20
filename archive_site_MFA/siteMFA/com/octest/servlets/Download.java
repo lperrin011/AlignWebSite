@@ -25,7 +25,7 @@ public class Download extends HttpServlet {
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// String directoryPath = "/home/lucie/eclipse-workspace/siteMFA/src/main/webapp/output/";
+		// Get the result in the output folder
 		 String webAppPath = getServletContext().getRealPath("/");
 		 String directoryPath = webAppPath + "output/";
 		 File folder = new File(directoryPath);
@@ -36,8 +36,6 @@ public class Download extends HttpServlet {
 			    response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			    return;
 			}
-		 
-		 FileInputStream inStream = new FileInputStream(result);
 		 
 		 String filePath = directoryPath + result.getName();
 			 
@@ -61,9 +59,8 @@ public class Download extends HttpServlet {
 		 
 		 try (BufferedInputStream entree = new BufferedInputStream( new FileInputStream( result ), TAILLE_TAMPON );
 		     BufferedOutputStream sortie = new BufferedOutputStream( response.getOutputStream(), TAILLE_TAMPON ) ){
-		     
-
-		     /* Lit le fichier et écrit son contenu dans la réponse HTTP */
+			 
+		     // Reads the result file and write it in the HTTP answer
 		     byte[] tampon = new byte[TAILLE_TAMPON];
 		     int longueur;
 		     while ( ( longueur= entree.read( tampon ) ) > 0 ) {
@@ -75,37 +72,13 @@ public class Download extends HttpServlet {
 	            request.setAttribute("errorMessage", errorMessage);
 	        }
 
-		 
-		 
-		    request.setAttribute("fileName", result.getName());
-		    request.setAttribute("fileSize", result.length());
-		    request.setAttribute("fileType", type);
-		    request.setAttribute("filePath", filePath);
 		    
-		    this.getServletContext().getRequestDispatcher("/WEB-INF/align.jsp").forward(request, response);
-		 
-		     
-//		 OutputStream outStream = response.getOutputStream();
-//		 
-//		 byte[] buffer = new byte[4096];
-//		 int bytesRead = -1;
-//		 
-//		 // Read the file and put it in the output stream
-//		 while ((bytesRead = inStream.read(buffer)) != -1) {
-//			 outStream.write(buffer, 0, bytesRead);
-//		 }	
-//	
-//		 inStream.close();
-//		 outStream.close();
-//		     
-//		 return;
-		     
+		    this.getServletContext().getRequestDispatcher("/WEB-INF/align.jsp").forward(request, response);	     
 	}	
 
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-	     
+		doGet(request, response);
 	}
 
 }
