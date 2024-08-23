@@ -3,11 +3,13 @@ package com.octest.servlets;
 import jakarta.servlet.ServletException;
 
 
+
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.BufferedInputStream;
@@ -16,37 +18,40 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.nio.file.*;
 
 
-public class Data extends HttpServlet {
+public class DataTranscript extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
     public static final int TAILLE_TAMPON = 10240;
-    public static final String CHEMIN_FICHIERS = "input/";
-    public static final String CHEMIN_SORTIE = "output/";
+    public static final String INPUT_PATH = "input/";
+    public static final String OUTPUT_PATH = "output/";
     
        
  
-    public Data() {
+    public DataTranscript() {
         super();
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		this.getServletContext().getRequestDispatcher("/WEB-INF/data.jsp").forward(request, response);
+		this.getServletContext().getRequestDispatcher("/WEB-INF/dataTranscript.jsp").forward(request, response);
 	}
 
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 	    String webAppPath = getServletContext().getRealPath("/");
+	    System.out.println("webAppPath : ");
+	    System.out.println(webAppPath);
 		
 		//Delete existing files in input and output directories
-		File directory = new File(webAppPath + CHEMIN_FICHIERS);
+		File directory = new File(webAppPath + INPUT_PATH);
         if (directory.exists() && directory.isDirectory()) {
             deleteDirectoryContents(directory);
         } 
 
-        directory = new File(webAppPath + CHEMIN_SORTIE);
+        directory = new File(webAppPath + OUTPUT_PATH);
         if (directory.exists() && directory.isDirectory()) {
             deleteDirectoryContents(directory);
         } 
@@ -55,36 +60,23 @@ public class Data extends HttpServlet {
         Part part = request.getPart("audio");
         String nomFichier = getNomFichier(part);
         String type = part.getContentType();
-        
-        // Get text file information
-        Part part2 = request.getPart("text");
-        String type2 = part2.getContentType();
-        String nomFichier2 = getNomFichier(part2);
        
         
         //////// VERIFICATIONS ///////////
         
         //Verify if data as been provided
-        if (nomFichier == null || nomFichier.isEmpty() || nomFichier2 == null || nomFichier2.isEmpty()) {
+        if (nomFichier == null || nomFichier.isEmpty()) {
         	//Figure out which files are missing
         	if(nomFichier == null || nomFichier.isEmpty()){
         		request.setAttribute("isAudio", "no");
         	}
-        	if(nomFichier2 == null || nomFichier2.isEmpty()) {
-        		request.setAttribute("isText", "no");
-        	}
         }
         
-        //Verify audio and transcription files have the same name -> necessary for MFA !
-        else if(!nomFichier.split("\\.")[0].equals(nomFichier2.split("\\.")[0])) {
-        	request.setAttribute("fileNames", "no");
-        }
-        
-        else { //In case data files have been provided
-        	//Verifying types
+      
+        else { //In case audio file have been provided
         	boolean audioType = false;
-        	boolean textType = false;
         	
+        	//Verifying types
         	//Audio
         	if(type.contains("audio")) { //verify the MIME type
         		audioType = true;
@@ -97,47 +89,81 @@ public class Data extends HttpServlet {
         		}
         	}
         	
-        	//Text
-        	String textExtension = nomFichier2.split("\\.")[1].trim(); 
-        	//Only verify the extension because few possibilities
-        	if(textExtension.equals("TextGrid") || textExtension.equals("txt") || textExtension.equals("lab")) {
-        		textType = true;
-        	}
         	
+    		/////// SAVING AUDIO /////////
         	
-        	
-    		/////// SAVING FILES /////////
-        	
-        	if(audioType == true && textType == true) { //In case both types are supported, we can write them
+        	if(audioType == true) { //In case the type is supported, we can write it
         		String nomChamp = part.getName();
-            	String nomChamp2 = part2.getName();
 
                 // Function that write the file
-                ecrireFichier(part, nomFichier, webAppPath + CHEMIN_FICHIERS);
-                ecrireFichier(part2, nomFichier2, webAppPath + CHEMIN_FICHIERS);
+                ecrireFichier(part, nomFichier, webAppPath + INPUT_PATH);
 
                 // Allows to print the name of the file given by the user on the page and to display the model part of the page
                 request.setAttribute(nomChamp, nomFichier);
-                request.setAttribute(nomChamp2, nomFichier2);
         	}
         	
         	//Print error message
-        	if(audioType == false && textType == false) {
-        		request.setAttribute("pbAudioText", "y");
-        	}
         	else if(audioType == false) {
         		request.setAttribute("pbAudioType", "y");
-        	}
-        	else if(textType == false) {
-        		request.setAttribute("pbTextType", "y");
         	}
         	//Print success message
         	else {
         		request.setAttribute("end", "ok");
         	}
         	
+        	
+        	/////// TRANSCRIPTION //////
+        	
+        	String chain = request.getParameter("chain");
+        	String extractor = request.getParameter("extractor");
+        	String lm = request.getParameter("lm");
+        	if(chain != null || extractor != null || lm != null) {
+        		if(chain != null && extractor != null && lm != null) {
+        			// launch the command with the urls in parameter
+        			String[] commands = { "cd /home/lucie/kaldi/egs/kaldi-asr-tutorial/s5",
+    						"python3 main.py " + webAppPath + INPUT_PATH + " " + chain + " " + extractor + " " + lm }; 
+    				try {
+    					executeCommandsSequentially(commands);
+    				} catch (IOException | InterruptedException e) {
+    					e.printStackTrace();
+    				}    
+        		}
+        		else { // not all needed urls have been given
+        			request.setAttribute("pbURL", "y");
+        			this.getServletContext().getRequestDispatcher("/WEB-INF/dataTranscript.jsp").forward(request, response);
+        			return;
+        		}
+        	}
+        	else {
+	        	String[] commands = { "cd /home/lucie/kaldi/egs/kaldi-asr-tutorial/s5",
+						"python3 main.py " + webAppPath + INPUT_PATH }; 
+				try {
+					executeCommandsSequentially(commands);
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				}    
+        	}
+			
+			//Need to remove the name of the file from the transcription file
+			String transcriptPath = webAppPath + INPUT_PATH + nomFichier.split("\\.")[0].trim() + ".txt";  
+
+	        try (BufferedReader transcriptReader = new BufferedReader(new FileReader(transcriptPath))) {
+	            String line2; 
+	            while ((line2 = transcriptReader.readLine()) != null) {
+	            	// Need to parse after the first space after the last /
+	            	 int lastSlashIndex = line2.lastIndexOf('/');
+	            	 if (lastSlashIndex != -1) {
+	            		 String firstParse = line2.substring(lastSlashIndex + 1).trim(); //only the name of file remains
+
+	            		 int firstSpaceIndex = firstParse.indexOf(' ');
+	            	     if (firstSpaceIndex != -1) {
+	            	    	 String sentence = firstParse.substring(firstSpaceIndex + 1).trim(); //Only the sentence remains
+	            	    	 Files.write(Paths.get(transcriptPath), sentence.getBytes());
+	            	      }
+	            	 }	            	  
+	            }	          
+	        }
         }
-        
              
       
       
@@ -147,7 +173,6 @@ public class Data extends HttpServlet {
         ArrayList<String> models = new ArrayList<>();
 		String filePath = webAppPath + "models.txt";  
         BufferedReader reader = null;
-		String debug ="";
 
 
         try {
@@ -189,7 +214,6 @@ public class Data extends HttpServlet {
         ArrayList<String> dicts = new ArrayList<>();
 		String filePathDict = webAppPath + "dictionaries.txt";  
         BufferedReader readerDict = null;
-        debug="";
 
         try {
             readerDict = new BufferedReader(new FileReader(filePathDict));
@@ -221,7 +245,7 @@ public class Data extends HttpServlet {
             }
         }  
 		
-		this.getServletContext().getRequestDispatcher("/WEB-INF/data.jsp").forward(request, response);
+		this.getServletContext().getRequestDispatcher("/WEB-INF/dataTranscript.jsp").forward(request, response);
 	}
 	
 	
@@ -272,6 +296,50 @@ public class Data extends HttpServlet {
 	            }
 	        }
 	    }
+	 
+	// Execute the commands and return true if the execution has succeeded and false otherwise
+		private boolean executeCommandsSequentially(String[] commands) throws IOException, InterruptedException {
+			// Concatenate the several commands
+			String command = String.join(" && ", commands);
+			boolean success = true;
+
+			ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command); //it is shell commands
+			processBuilder.redirectErrorStream(true);
+
+			// launch the command with processBuilder
+			Process process = processBuilder.start();
+			System.out.println("in execute command"); //debugging
+			StringBuilder output = new StringBuilder();
+			StringBuilder errorOutput = new StringBuilder();
+
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+					BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+				String line;
+				//get the output
+				while ((line = reader.readLine()) != null) {
+					System.out.println(line);
+					output.append(line).append("\n");
+				}
+
+				while ((line = errorReader.readLine()) != null) {
+					errorOutput.append(line).append("\n");
+				}
+
+				int exitCode = process.waitFor();
+				if (exitCode != 0) {
+					success = false;
+				}
+			} finally {
+				// Ensure that the output stream is closed and the process is destroyed
+				process.getOutputStream().close();
+				process.destroy();
+			}
+
+			System.out.println("Commande exécutée avec succès !");
+			return success;
+			
+
+		}
 
 }
 

@@ -38,43 +38,25 @@
 
 	<section class="top-page">
 		<h1 class="big-title">Phonetic forced-aligner</h1>
-		
-		<!-- Ask to give the Wav and the TextGrid files -->
-		<div class="data" id="data">
-			<h2 title="Load your data" class="title">Data</h2>
-
-			<form class="data-form" action="data" method="post" enctype="multipart/form-data">
-				<div class="data-items">
-					<div class="data-item">
-						<img src="./images/volume.png" alt="volume icon"> <label
-							for="audio" class="data-details">Load audio file</label><br>
-						<input class="data-input" type="file" name="audio" id="audio" title="Add the audio file">
-					</div>
-
-					<div class="data-item">
-						<img src="./images/edit.png" alt="text icon"> <label
-							for="text" class="data-details">Load transcription file</label><br>
-						<input class="data-input" type="file" name="text" id="text" title="Add the transcription file">
-					</div>
-				</div>
-				<br>
-				<br> <input class="data-submit" type="submit" value="OK" title="Validate input files">
-			</form>
-    	
+		<div class="instructions-container">
+			<div class="instructions">
+				<p>In order to use the Montreal Forced aligner, you need to provide an <strong>audio file</strong> and its transcription.</p>
+				<p>However, if you <strong>only have the audio file</strong>, this web site can automatically create the corresponding transcription file. 
+				This function uses the tool Kaldi so you will need to provide the <strong>language model</strong> you want to use.</p>
+				<p> For more details, please refer to the  <a href="http://kaldi-asr.org/doc/" class="doc-link">Kaldi documentation</a>. </p>
+			</div>
+		</div>
+		<div class="dispatcher">
+			<form action="data" method="get">
+        		<button type="submit" class="dispatcher-button">I have an audio file and its transcription</button>
+    		</form>
+    		<form action="dataTranscript" method="get">
+        		<button type="submit" class="dispatcher-button">I have only an audio file</button>
+    		</form>
 		</div>
 
 	</section>
 	
-    
-    <!-- Button to display the JSP that print the result -->
- <!--    <form class="print-form" action="printText" method="get" enctype="multipart/form-data">
-		<input class="print-button" type="submit">	
-	</form> -->
-	
-	
-   
-    	
-   
     
 	<footer class="footer"> </footer>
 

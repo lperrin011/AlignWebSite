@@ -39,39 +39,64 @@
 	<section class="top-page">
 		<h1 class="big-title">Phonetic forced-aligner</h1>
 		<!-- Ask to give the wav and the text files -->
-		<div class="data" id="data">
+		<div class="dataTranscript" id="data">
 			<h2 title="Load your data" class="title">Data</h2>
 
-			<form class="data-form" action="data" method="post" enctype="multipart/form-data">
+			<form class="data-form" action="dataTranscript" method="post" enctype="multipart/form-data">
 				<div class="data-items">
 					<div class="data-item">
 						<img src="./images/volume.png" alt="volume icon"> <label
 							for="audio" class="data-details">Load audio file</label><br>
 						<input class="data-input" type="file" name="audio" id="audio" title="Add the audio file"/>
 					</div>
-
-					<div class="data-item">
-						<img src="./images/edit.png" alt="text icon"> <label
-							for="text" class="data-details">Load transcription file</label><br>
-						<input class="data-input" type="file" name="text" id="text" title="Add the transcription file">
-					</div>
 				</div>
-				<br>
-				<br> <input class="data-submit" type="submit" value="OK" title="Validate input files">
+				<div class="instructions">
+					<p>By default, the Kaldi model used for generating the transcription file is the <a href="http://kaldi-asr.org/models/m13" class="doc-link">English model Librispeech</a>. </p>
+
+					<p>If you want to use another Kaldi model for transcription, please check the box below.</p>
+				</div>
+				<div class="checkbox-part2">	
+						<input type="checkbox" id="kaldi-text"> 
+						<label for="kaldi-text" class="import-text">Add your own Kaldi model</label>
+				</div>
+					<div class="hidden-content3">
+						<div class="instructions">
+							<p>To do the transcription with Kaldi, you need to provide the following files :</p>
+							<ul>
+								<li>a <strong>chain model</strong> : the model used to create the decoding graph and the lexicon</li>
+								<li>a <strong>ivector extractor</strong> : the model used to identify the different speakers</li>
+								<li>a <strong>language model</strong> : the model used to statically predict the sequence of words.</li>
+							</ul>
+							<p>So please provide the url addresses where each file of your model can be found.</p>
+							<div class="transcript-items">
+								<div class="transcript-item">
+									<label for="chain" class="kaldi-model">Chain model : </label>
+									<input class="kaldi-url" type="url" name="chain" id="chain" title="URL of the chain model" placeholder="http://kaldi-asr.org/models/13/0013_librispeech_v1_main.tar.gz"/> <br>
+								</div>
+								<div class="transcript-item">
+									<label for="extractor" class="kaldi-model">Ivector extractor : </label>
+									<input class="kaldi-url" type="url" name="extractor" id="extractor" title="URL of the ivector extractor" placeholder="http://kaldi-asr.org/models/13/0013_librispeech_v1_extractor.tar.gz"/> <br>
+								</div>
+								<div class="transcript-item">
+									<label for="lm" class="kaldi-model">Language model : </label>
+									<input class="kaldi-url" type="url" name="lm" id="lm" title="URL of the lm model" placeholder="http://kaldi-asr.org/models/13/0013_librispeech_v1_lm.tar.gz"/> <br>
+								</div>
+							</div>
+						</div>
+						
+					</div>
+				
+				 <input class="data-submit" type="submit" value="OK" title="Validate input files">
+				<!-- <script src="js/hidden.js"></script> -->
+				
 			</form>
 			
 			<!-- Print an error or success message depending on if files are filled and the types are good -->
 			<p>
 			<span class="error-message">
-			${ !empty isAudio && !empty isText ? "Please load data files" : ""} 
-			${ empty isAudio && !empty isText ? "Transcription file is missing" : ""} 
-			${ !empty isAudio && empty isText ? "Audio file is missing" : ""} 
-			${ !empty fileNames ? "Audio and transcription files need to have the same name !" : ""}
-			
-			
+			${ !empty isAudio ? "Audio file is missing" : ""} 
 			${ !empty pbAudioType ? "The format of the audio file is not supported by the MFA. All audio formats are supported by the MFA but WAV format gives better precision." : ""} 
-			${ !empty pbTextType ? "The format of the transcription file is not supported by the MFA. Supported transcription formats are txt, lab and TextGrid." : ""}
-			${ !empty pbAudioText ? "The formats of the transcription and the audio files are not supported by the MFA. " : ""} </span>
+			${ !empty pbURL ? "One or more of the model urls are missing" : "" }</span>
 			
 			<span class="success-message">${ !empty end ? "Files successfully saved" : ""} </span>
 			</p>
@@ -83,9 +108,8 @@
 	
 
 	<!-- In case provided files are good, display the model part -->
-	<% String audio = (String) request.getAttribute("audio");
-	String text = (String) request.getAttribute("text"); %>
-	<% if (audio != null && !audio.isEmpty() && text != null && !text.isEmpty()) { %>
+	<% String audio = (String) request.getAttribute("audio");%>
+	<% if (audio != null && !audio.isEmpty()) { %>
 	<section class="model" id="model">
 		<div class="model-item">
 			
@@ -140,7 +164,7 @@
 
 						</div>
 					</div>
-					<script src="js/hidden.js"></script>
+					<!-- <script src="js/hidden.js"></script> -->
 				</div>
 				
 				
@@ -189,8 +213,8 @@
 							
 						</div>
 					</div>
-					
-					<script src="js/hidden.js"></script>
+					<!-- 
+					<script src="js/hidden.js"></script> -->
 				</div>
 				<p class="error-message">
 				
@@ -209,7 +233,7 @@
 
 <% } %>
     
-
+	<script src="js/hidden.js"></script>
 	<footer class="footer"> </footer>
 
 </body>
