@@ -36,6 +36,18 @@ playBtn.addEventListener("click", () => {
   }
 });
 
+// Play or pause by pressing the space bar
+document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+		audioTrack.playPause();
+		  if(audioTrack.isPlaying()){
+		      playBtn.classList.add("playing");
+		  } else{
+		      playBtn.classList.remove("playing");
+		  }
+    }
+});
+
 stopBtn.addEventListener("click", () =>{
   audioTrack.stop();
   playBtn.classList.remove("playing");
@@ -48,17 +60,6 @@ volumeSlider.addEventListener("mouseup", () =>{
 volumeSlider.addEventListener("keydown", () =>{
     changeVolume(volumeSlider.value);
 })
-
-const changeVolume = (volume) =>{
-    if(volume == 0){
-        muteBtn.classList.add("muted");
-    } 
-    else if(muteBtn.classList.contains("muted")){
-        muteBtn.classList.remove("muted");
-    }
-    audioTrack.setVolume(volume);
-}
-
 
 
 muteBtn.addEventListener("click", () =>{
@@ -73,16 +74,16 @@ muteBtn.addEventListener("click", () =>{
     }  
 })
 
-// Play or pause by pressing the space bar
-document.addEventListener('keydown', function(event) {
-    if (event.code === 'Space') {
-		audioTrack.playPause();
-		  if(audioTrack.isPlaying()){
-		      playBtn.classList.add("playing");
-		  } else{
-		      playBtn.classList.remove("playing");
-		  }
+
+const changeVolume = (volume) =>{
+    if(volume == 0){
+        muteBtn.classList.add("muted");
+    } 
+    else if(muteBtn.classList.contains("muted")){
+        muteBtn.classList.remove("muted");
     }
-});
+    audioTrack.setVolume(volume);
+}
+
 
 

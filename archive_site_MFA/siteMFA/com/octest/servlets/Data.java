@@ -3,6 +3,7 @@ package com.octest.servlets;
 import jakarta.servlet.ServletException;
 
 
+
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -58,7 +59,7 @@ public class Data extends HttpServlet {
         
         // Get text file information
         Part part2 = request.getPart("text");
-        String type2 = part2.getContentType();
+//        String type2 = part2.getContentType();
         String nomFichier2 = getNomFichier(part2);
        
         
