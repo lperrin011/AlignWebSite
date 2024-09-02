@@ -26,7 +26,9 @@ Then, you can modify the path of Kaldi in **DataTranscript.java**.
 
 This project can be run by a server like **Apache Tomcat**.  
 
+
+<br>
  
-********
+******************************************************************************
  
  *This code has been realized by Lucie Perrin (lucie.perrin@bordeaux-inp.fr).*
