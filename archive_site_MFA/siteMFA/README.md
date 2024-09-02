@@ -3,11 +3,11 @@
 
 ## Project organization
 
-Source web files for the web site are in **src/main/webapp**.
+* Source files for the web site are in **src/main/webapp**.
 
-Java servlets are in **com/octest/servlets**.
+* Java servlets are in **com/octest/servlets**.
 
-Java beans are is **com/octest/beans**.
+* Java beans are in **com/octest/beans**.
 
 
 
@@ -15,7 +15,7 @@ Java beans are is **com/octest/beans**.
 
 This project needs the Montreal Forced Aligner. To download and configure it, you can follow the [MFA documentation](https://montreal-forced-aligner.readthedocs.io/en/latest/getting_started.html).
 
-Once it is done, you need to modify the **MODEL_PATH** and the **DICT_PATH** in Align.java to adapt to the actual location of the MFA on your computer or server.
+Once it is done, you need to modify the **MODEL_PATH** and the **DICT_PATH** in Align.java : adapt it to the actual location of the MFA on your computer or your server.
 
 Please also modify in the WEB-INF/web.xml file the path of the directory **fichierstmp** with the actual location of the project on your computer.
 
