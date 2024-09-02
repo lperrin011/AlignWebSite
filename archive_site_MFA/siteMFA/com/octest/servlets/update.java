@@ -27,43 +27,9 @@ public class update extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-//        String scriptPath = "./lists.sh";
-//
-//        ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", scriptPath);
-		
 		String webAppPath = getServletContext().getRealPath("/");
 		System.out.println(webAppPath);
-//		String scriptPath = webAppPath + "lists.sh";
-//		
-//		ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", scriptPath);
-        
-        try {
-//            Process process = processBuilder.start();
-            
-            // output answer of the shell script
-//            BufferedReader reader2 = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-//            
-//            String line2;
-//            StringBuilder output = new StringBuilder();
-//            while ((line2 = reader2.readLine()) != null) {
-//                output.append(line2).append("\n");
-//            }
-//            StringBuilder errorOutput = new StringBuilder();
-//            while ((line2 = errorReader.readLine()) != null) {
-//                errorOutput.append(line2).append("\n");
-//            }
-//            
-//            // Wait until the script is done
-//            int exitCode = process.waitFor();
-//            
-//            // Print the output
-//            System.out.println("Output:");
-//            System.out.println(output);
-//            System.out.println("Errors:");
-//            System.out.println(errorOutput);
-//            System.out.println("Exited with code: " + exitCode);
-            
+        try {       
             
             String[] commands = { "source /home/lucie/miniconda3/etc/profile.d/conda.sh", "conda activate aligner",
 					"mfa model download acoustic > " + webAppPath + "models.txt",
@@ -166,10 +132,7 @@ public class update extends HttpServlet {
             }  
             
             this.getServletContext().getRequestDispatcher("/WEB-INF/hiddenData.jsp").forward(request, response);
-//            // Envoyez la réponse au client
-//            response.setContentType("text/plain");
-//            response.getWriter().write("Script executed with exit code: " + exitCode + "\nOutput:\n" + output + "\nErrors:\n" + errorOutput);
-            
+       
         } catch (IOException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error executing script: " + e.getMessage());
